@@ -65,11 +65,11 @@
 
 #define USBD_VID     1155
 #define USBD_LANGID_STRING     1033
-#define USBD_MANUFACTURER_STRING     "STMicroelectronics [MIDI minimal]"
+#define USBD_MANUFACTURER_STRING     "BOSSCorp"
 #define USBD_PID_FS     22338
-#define USBD_PRODUCT_STRING_FS     "STM32 MIDI Minimal"
-#define USBD_CONFIGURATION_STRING_FS     "MIDI Config"
-#define USBD_INTERFACE_STRING_FS     "MIDI Interface"
+#define USBD_PRODUCT_STRING_FS     "BOSSCorp midi controller"
+#define USBD_CONFIGURATION_STRING_FS     "midi streaming configuration"
+#define USBD_INTERFACE_STRING_FS     "midi streaming interface"
 
 /* USER CODE BEGIN PRIVATE_DEFINES */
 
@@ -152,9 +152,9 @@ __ALIGN_BEGIN uint8_t USBD_FS_DeviceDesc[USB_LEN_DEV_DESC] __ALIGN_END =
   USB_DESC_TYPE_DEVICE,       /*bDescriptorType*/
   0x00,                       /*bcdUSB */
   0x02,
-  0x00,                       /*bDeviceClass*/ /* 0x00 == defined at interface level */
-  0x00,                       /*bDeviceSubClass*/ /* subclass is 0x00 if deviceclass is 0x00 */
-  0x00,                       /*bDeviceProtocol*/ /* unused for MIDI */
+  0x02,                       /*bDeviceClass*/
+  0x02,                       /*bDeviceSubClass*/
+  0x00,                       /*bDeviceProtocol*/
   USB_MAX_EP0_SIZE,           /*bMaxPacketSize*/
   LOBYTE(USBD_VID),           /*idVendor*/
   HIBYTE(USBD_VID),           /*idVendor*/

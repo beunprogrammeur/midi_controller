@@ -13,7 +13,7 @@
 //static int8_t MIDI_Transmit_FS(uint8_t* buff, uint8_t length);
 //static int8_t MIDI_Receive_FS(uint8_t* buff, uint8_t length);
 
-USBD_MIDI_ItfTypeDef USBD_Interface_fops_FS =
+USBD_MIDI_ItfTypeDef USBD_MIDI_Interface_fops_FS =
 {
 		//MIDI_Init_FS,
 		//MIDI_DeInit_FS,
@@ -22,14 +22,14 @@ USBD_MIDI_ItfTypeDef USBD_Interface_fops_FS =
 };
 
 
-uint8_t MIDI_Receive(uint8_t* buff, uint8_t length)
+int8_t MIDI_Receive(uint8_t* buff, uint8_t length)
 {
 	// TODO: add your incoming message handling here
 
 	return 0;
 }
 
-uint8_t MIDI_Transmit(uint8_t* buff, uint8_t length)
+int8_t MIDI_Transmit(uint8_t* buff, uint8_t length)
 {
 	return MIDI_TransmitData(buff, length);
 }
