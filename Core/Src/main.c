@@ -25,8 +25,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "usbd_midi_if.h"
-#include <stdint.h>
+#include "cpp_main.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -91,9 +90,7 @@ int main(void)
   MX_GPIO_Init();
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
-  uint8_t pressNote[] = {0x08, 0x90, 0x3c, 0x64};
-  uint8_t releaseNote[] = {0x08, 0x80, 0x3c, 0x64};
-  HAL_Delay(800);
+  cpp_main();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -103,11 +100,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-	  HAL_Delay(500);
-	  MIDI_Transmit(pressNote, 4);
-	  HAL_Delay(500);
-	  MIDI_Transmit(releaseNote, 4);
+
   }
   /* USER CODE END 3 */
 }
