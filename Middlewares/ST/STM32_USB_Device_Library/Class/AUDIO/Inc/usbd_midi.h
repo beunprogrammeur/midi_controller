@@ -30,6 +30,7 @@ extern USBD_ClassTypeDef USBD_MIDI;
 uint8_t USBD_MIDI_RegisterInterface(USBD_HandleTypeDef *pdev, USBD_MIDI_ItfTypeDef *fops);
 /* used internally */
 uint8_t MIDI_TransmitData(uint8_t* buff, uint8_t length);
+
 #ifdef __cplusplus
 }
 #endif
