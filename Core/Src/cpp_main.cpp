@@ -12,6 +12,8 @@
 #include "tim.h"
 
 #include "midi/control_change.h"
+#include "midi/note.h"
+
 
 template<typename T>
 void MIDI_SendPacket(T& packet)
@@ -85,6 +87,30 @@ void cpp_main()
 	HAL_ADC_Start_DMA(&hadc1, adcValues, 50); // do 10 conversions each. calc averages in the timer callback
 	HAL_TIM_Base_Start_IT(&htim1);
 
+	MIDI::Note note;
+	note.channel(0);
+	note.pitch(40);
+	note.velocity(127);
+	note.press();
+
+
+	// sending notes demo. uncomment this loop for the other demo
+	while(true)
+	{
+		for(int i = 40; i < 52; i++)
+		{
+			note.pitch(i);
+			HAL_Delay(500);
+			MIDI_SendPacket(note);
+			note.press();
+			HAL_Delay(500);
+			MIDI_SendPacket(note);
+			note.release();
+		}
+	}
+
+
+	// CC demo, connect a potentiometer to PORTA0
 	while(true)
 	{
 		if(!commandChanged)
@@ -95,6 +121,9 @@ void cpp_main()
 		commandChanged = false;
 
 		MIDI_SendPacket(command);
+
+
+		// for debug purposes
 		HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin, GPIO_PIN_RESET);
 		HAL_Delay(10);
 		HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin, GPIO_PIN_SET);
