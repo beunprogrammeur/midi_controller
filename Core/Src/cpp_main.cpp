@@ -5,15 +5,25 @@
  *      Author: vincent
  */
 
+
 #include "cpp_main.h"
+
+// peripherals
 #include "gpio.h"
-#include "usbd_midi_if.h"
 #include "adc.h"
 #include "tim.h"
+#include "i2c.h"
 
+// midi
+#include "usbd_midi_if.h"
 #include "midi/control_change.h"
 #include "midi/note.h"
 
+// display
+#include <string>
+#include "128x32/oled.h"
+#include "128x32/gfx.h"
+#include "128x32/fonts.h"
 
 template<typename T>
 void MIDI_SendPacket(T& packet)
@@ -44,6 +54,8 @@ bool changedCommands[5] {
 	false
 };
 
+
+constexpr uint8_t DisplayAddress = 120;
 
 
 
@@ -128,17 +140,39 @@ void cpp_main()
 	//	}
 	//}
 
+	oled_init();
+	for(int x = 0; x < 128; x++)
+	{
+		draw_pixel(x, 0,  WHITE);
+		draw_pixel(x, 31, WHITE);
+	}
 
+	for(int y = 0; y < 32; y++)
+	{
+		draw_pixel(0,   y, WHITE);
+		draw_pixel(127, y, WHITE);
+	}
+
+	graphics_text(4, 4, FONT_SEVEN_DOT, "Hello World!");
+
+
+	oled_update();
 	// CC demo, connect a potentiometer to PORTA0
 	while(true)
 	{
 
-		for(int i = 0; i < 2; i++)
+ 		for(int i = 0; i < 2; i++)
 		{
 			if(changedCommands[i])
 			{
 				changedCommands[i] = false;
 				MIDI_SendPacket(commands[i]);
+
+				//std::stringstream ss;
+				//ss << "cc " << i <<  ' : ' << commands[i].value();
+				//ssd1306_Fill(Black);
+				////ssd1306_WriteString(ss.str().c_str(), Font_7x10, White);
+				//ssd1306_UpdateScreen();
 			}
 		}
 	}

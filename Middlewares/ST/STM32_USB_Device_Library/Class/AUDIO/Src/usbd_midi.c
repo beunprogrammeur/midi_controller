@@ -42,7 +42,7 @@ __ALIGN_BEGIN uint8_t USB_TX_BUFF[MIDI_DATA_FS_MAX_PACKET_SIZE] __ALIGN_END;
 USBD_HandleTypeDef* _handle = NULL;
 
 
-__ALIGN_BEGIN uint8_t USBD_MIDI_CfgFSDesc[] __ALIGN_END =
+__ALIGN_BEGIN const uint8_t USBD_MIDI_CfgFSDesc[] __ALIGN_END =
 {
 //  /*Configuration Descriptor*/
 //  0x09,   /* bLength: Configuration Descriptor size */
