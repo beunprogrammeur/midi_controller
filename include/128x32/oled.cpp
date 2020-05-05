@@ -1,14 +1,16 @@
 #include "stm32f1xx_hal.h"
 #include "oled.h"
-
+#include "i2c.h"
 #ifdef _cplusplus
 extern "C" {
 #endif
 
+
+
 #define LCDaddr 0x69
 #define vccstate 0x2
 
-extern I2C_HandleTypeDef hi2c1;
+namespace OLED {
 
 extern uint8_t gddram[4][128];
 
@@ -23,7 +25,7 @@ void ssd1306_command(uint8_t byte)
 
 }
 
-void oled_update(void)
+void update(void)
 {
   ssd1306_command(SSD1306_COLUMNADDR);
   ssd1306_command(0);   // Column start address (0 = reset)
@@ -52,7 +54,7 @@ void oled_update(void)
 
 }
 
-void oled_init(void)
+void init(void)
 {
 	// Init sequence
   ssd1306_command(SSD1306_DISPLAYOFF);                    // 0xAE
@@ -219,7 +221,7 @@ void Dim(uint8_t dim) {
   ssd1306_command(contrast);
 }
 
-
+} // end namespace OLED
 
 
 #ifdef _cplusplus

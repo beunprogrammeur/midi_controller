@@ -19,8 +19,10 @@
 extern "C" {
 #endif
 
-void oled_update(void);
-void oled_init(void);
+namespace OLED {
+
+void update(void);
+void init(void);
 void Startscrollright(uint8_t start, uint8_t stop);
 
 
@@ -88,6 +90,8 @@ void Startscrollright(uint8_t start, uint8_t stop);
 #define SSD1306_LEFT_HORIZONTAL_SCROLL 0x27
 #define SSD1306_VERTICAL_AND_RIGHT_HORIZONTAL_SCROLL 0x29
 #define SSD1306_VERTICAL_AND_LEFT_HORIZONTAL_SCROLL 0x2A
+
+} // end namespace OLED
 
 #ifdef __cplusplus
 }

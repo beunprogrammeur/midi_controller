@@ -43,6 +43,11 @@ void ControlChange::cc(ControlChangeId id)
 	_data[1] = static_cast<uint8_t>(id);
 }
 
+uint8_t ControlChange::cc() const
+{
+	return _data[1];
+}
+
 void ControlChange::value(uint8_t val)
 {
 	if(val > 127)

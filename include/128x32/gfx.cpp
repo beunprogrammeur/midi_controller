@@ -14,6 +14,8 @@ COORDINATES for 128*32 pixels (x,y)
 extern "C" {
 #endif
 
+namespace OLED {
+
 uint8_t gddram[4][128];
 
 
@@ -221,7 +223,7 @@ void graphics_Glyph(unsigned char left, unsigned char top,
 	}
 }
 
-void graphics_text(unsigned char left, unsigned char top, unsigned char font, char *str)
+void graphics_text(unsigned char left, unsigned char top, unsigned char font, const char *str)
 {
 	unsigned char x = left;
 	unsigned char glyph;
@@ -372,7 +374,7 @@ void draw_bitmap_fast(uint8_t left, uint8_t top, const unsigned char *bitmap)
 		}
 }
 
-
+} // end namespace OLED
 
 #ifdef _cplusplus
 }

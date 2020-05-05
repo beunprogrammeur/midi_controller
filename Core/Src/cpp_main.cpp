@@ -38,20 +38,40 @@ int32_t map(int32_t value, int32_t in_min, int32_t in_max, int32_t out_min, int3
 
 uint32_t adcValues[50];
 
-MIDI::ControlChange commands[5] {
-	MIDI::ControlChange(),
-	MIDI::ControlChange(),
-	MIDI::ControlChange(),
-	MIDI::ControlChange(),
-	MIDI::ControlChange(),
+struct PotWrapper {
+	MIDI::ControlChange command;
+	bool changed;
+	uint8_t drawXPos;
+	uint8_t drawYPos;
 };
 
-bool changedCommands[5] {
-	false,
-	false,
-	false,
-	false,
-	false
+// the potmeter definition, the numbers are the position on the screen x,y
+PotWrapper potmeters[5] { 	{
+		MIDI::ControlChange(),
+		false,
+		0,
+		25
+	}, {
+		MIDI::ControlChange(),
+		false,
+		26,
+		18
+	}, {
+		MIDI::ControlChange(),
+		false,
+		50,
+		25
+	}, {
+		MIDI::ControlChange(),
+		false,
+		76,
+		18
+	}, {
+		MIDI::ControlChange(),
+		false,
+		100,
+		25
+	}
 };
 
 
@@ -96,10 +116,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			}
 
 			uint8_t newValue = map(averages[i], ADC_MIN_OFFSET, ADC_MAX_OFFSET, MIDI_CC_MIN, MIDI_CC_MAX);
-			if(newValue != commands[i].value())
+			if(newValue != potmeters[i].command.value())
 			{
-				commands[i].value(newValue);
-				changedCommands[i] = true;
+				potmeters[i].command.value(newValue);
+				potmeters[i].changed = true;
 			}
 		}
 	}
@@ -110,22 +130,26 @@ void cpp_main()
 	// initialize the commands that are changed by the potentiometers
 	for(int i = 0; i < 5; i++)
 	{
-		commands[i].channel(0);
-		commands[i].cc(i);
-		commands[i].value(0);
+		potmeters[i].command.channel(0);
+		potmeters[i].command.cc(i);
+		potmeters[i].command.value(0);
 	}
+
+
+
 
 	HAL_ADC_Start_DMA(&hadc1, adcValues, 50); // do 10 conversions each. calc averages in the timer callback
 	HAL_TIM_Base_Start_IT(&htim1);
 
-	MIDI::Note note;
-	note.channel(0);
-	note.pitch(40);
-	note.velocity(127);
-	note.press();
+
 
 
 	// sending notes demo. uncomment this loop for the other demo
+	//MIDI::Note note;
+	//note.channel(0);
+	//note.pitch(40);
+	//note.velocity(127);
+	//note.press();
 	//while(true)
 	//{
 	//	for(int i = 40; i < 52; i++)
@@ -140,40 +164,29 @@ void cpp_main()
 	//	}
 	//}
 
-	oled_init();
-	for(int x = 0; x < 128; x++)
-	{
-		draw_pixel(x, 0,  WHITE);
-		draw_pixel(x, 31, WHITE);
-	}
-
-	for(int y = 0; y < 32; y++)
-	{
-		draw_pixel(0,   y, WHITE);
-		draw_pixel(127, y, WHITE);
-	}
-
-	graphics_text(4, 4, FONT_SEVEN_DOT, "Hello World!");
-
-
-	oled_update();
+	OLED::init();
+	OLED::graphics_text(0,2, FONT_BASE::FONT_SEVEN_DOT, "CC:");
+	OLED::update();
 	// CC demo, connect a potentiometer to PORTA0
 	while(true)
 	{
+		bool updateScreen = false;
 
- 		for(int i = 0; i < 2; i++)
+		for(auto& potmeter : potmeters)
 		{
-			if(changedCommands[i])
+			if(potmeter.changed)
 			{
-				changedCommands[i] = false;
-				MIDI_SendPacket(commands[i]);
-
-				//std::stringstream ss;
-				//ss << "cc " << i <<  ' : ' << commands[i].value();
-				//ssd1306_Fill(Black);
-				////ssd1306_WriteString(ss.str().c_str(), Font_7x10, White);
-				//ssd1306_UpdateScreen();
+				potmeter.changed = false;
+				updateScreen = true;
+				MIDI_SendPacket(potmeter.command);
+				OLED::graphics_text(potmeter.drawXPos, potmeter.drawYPos, FONT_BASE::FONT_SEVEN_DOT, std::to_string(potmeter.command.value()).c_str());
+				OLED::graphics_text(18, 2, FONT_BASE::FONT_SEVEN_DOT, std::to_string(potmeter.command.cc()).c_str());
 			}
+		}
+
+		if(updateScreen) {
+			updateScreen = false;
+			OLED::update();
 		}
 	}
 }

@@ -110,6 +110,7 @@ public:
 	// cc is the control change id, there are 127 id's
 	void cc(uint8_t id);
 	void cc(ControlChangeId id);
+	uint8_t cc() const;
 	void value(uint8_t val);
 	uint8_t value() const;
 };
