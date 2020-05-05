@@ -27,15 +27,31 @@ int32_t map(int32_t value, int32_t in_min, int32_t in_max, int32_t out_min, int3
 }
 
 uint32_t adcValues[50];
-volatile bool commandChanged = false;
-MIDI::ControlChange command;
+
+MIDI::ControlChange commands[5] {
+	MIDI::ControlChange(),
+	MIDI::ControlChange(),
+	MIDI::ControlChange(),
+	MIDI::ControlChange(),
+	MIDI::ControlChange(),
+};
+
+bool changedCommands[5] {
+	false,
+	false,
+	false,
+	false,
+	false
+};
+
+
+
 
 constexpr uint32_t ADC_MAX_OFFSET = 3900;
 constexpr uint32_t ADC_MIN_OFFSET = 10;
 constexpr uint32_t ADC_DELTA = ADC_MAX_OFFSET - ADC_MIN_OFFSET;
 constexpr uint32_t MIDI_CC_MIN = 0;
 constexpr uint32_t MIDI_CC_MAX = 127;
-uint8_t ccOutput = 0;
 //void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 //{
 //
@@ -66,23 +82,26 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			{
 				averages[i] = ADC_MIN_OFFSET;
 			}
-		}
 
-		uint8_t newValue = map(averages[0], ADC_MIN_OFFSET, ADC_MAX_OFFSET, MIDI_CC_MIN, MIDI_CC_MAX);
-		ccOutput = newValue;
-		if(newValue != command.value())
-		{
-			command.value(newValue);
-			commandChanged = true;
+			uint8_t newValue = map(averages[i], ADC_MIN_OFFSET, ADC_MAX_OFFSET, MIDI_CC_MIN, MIDI_CC_MAX);
+			if(newValue != commands[i].value())
+			{
+				commands[i].value(newValue);
+				changedCommands[i] = true;
+			}
 		}
 	}
 }
 
 void cpp_main()
 {
-	command.channel(0);
-	command.cc(0x0a);
-	command.value(0xDE);
+	// initialize the commands that are changed by the potentiometers
+	for(int i = 0; i < 5; i++)
+	{
+		commands[i].channel(0);
+		commands[i].cc(i);
+		commands[i].value(0);
+	}
 
 	HAL_ADC_Start_DMA(&hadc1, adcValues, 50); // do 10 conversions each. calc averages in the timer callback
 	HAL_TIM_Base_Start_IT(&htim1);
@@ -95,37 +114,32 @@ void cpp_main()
 
 
 	// sending notes demo. uncomment this loop for the other demo
-	while(true)
-	{
-		for(int i = 40; i < 52; i++)
-		{
-			note.pitch(i);
-			HAL_Delay(500);
-			MIDI_SendPacket(note);
-			note.press();
-			HAL_Delay(500);
-			MIDI_SendPacket(note);
-			note.release();
-		}
-	}
+	//while(true)
+	//{
+	//	for(int i = 40; i < 52; i++)
+	//	{
+	//		note.pitch(i);
+	//		HAL_Delay(500);
+	//		MIDI_SendPacket(note);
+	//		note.press();
+	//		HAL_Delay(500);
+	//		MIDI_SendPacket(note);
+	//		note.release();
+	//	}
+	//}
 
 
 	// CC demo, connect a potentiometer to PORTA0
 	while(true)
 	{
-		if(!commandChanged)
+
+		for(int i = 0; i < 2; i++)
 		{
-			continue;
+			if(changedCommands[i])
+			{
+				changedCommands[i] = false;
+				MIDI_SendPacket(commands[i]);
+			}
 		}
-
-		commandChanged = false;
-
-		MIDI_SendPacket(command);
-
-
-		// for debug purposes
-		HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin, GPIO_PIN_RESET);
-		HAL_Delay(10);
-		HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin, GPIO_PIN_SET);
 	}
 }
