@@ -23,11 +23,11 @@
 
 /* select desired fonts. (Simply comment out those not needed) */
 #define EN_FIVE_DOT
-#define EN_SIX_DOT
+//#define EN_SIX_DOT
 #define EN_SEVEN_DOT
-#define EN_NINE_DOT
+//#define EN_NINE_DOT
 //#define EN_TEN_DOT
-#define EN_FIFTEEN_DOT
+//#define EN_FIFTEEN_DOT
 //#define EN_EIGHTEEN_DOT
 //#define EN_FONT_MT1
 

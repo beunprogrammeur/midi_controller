@@ -7,10 +7,16 @@
 
 #ifndef INC_CPP_MAIN_H_
 #define INC_CPP_MAIN_H_
+#include <stdint.h>
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+
+
+
 
 void cpp_main();
 

@@ -33,6 +33,11 @@ void ControlChange::channel(uint8_t ch)
 	_data[0] |= ch;
 }
 
+uint8_t ControlChange::channel() const
+{
+	return _data[0] & 0x0f;
+}
+
 void ControlChange::cc(uint8_t id)
 {
 	_data[1] = id;

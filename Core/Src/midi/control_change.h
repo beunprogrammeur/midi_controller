@@ -107,6 +107,7 @@ public:
 	ControlChange();
 
 	void channel(uint8_t ch);
+	uint8_t channel() const;
 	// cc is the control change id, there are 127 id's
 	void cc(uint8_t id);
 	void cc(ControlChangeId id);
