@@ -26,11 +26,20 @@
 #include "128x32/fonts.h"
 #include "point.h"
 
+// encoder
+#include "stm32f1xx_it.h"
+
+
 namespace {
 	struct PotWrapper {
 		MIDI::ControlChange command;
 		bool changed;
 		uint8_t pot_index; // order from left to right, which potentiometer is this?
+	};
+
+	enum class EncoderMode {
+		CC,
+		Channel
 	};
 
 	constexpr uint8_t pot_count = 5;
@@ -69,6 +78,10 @@ namespace {
 		{104, 21},
 	};
 
+	uint8_t old_encoder_value = 0;
+	EncoderMode encoder_mode = EncoderMode::Channel;
+	bool updateScreen = false;
+
 	void draw_horizontal_line(uint8_t x, uint8_t y, uint8_t width, uint8_t height, uint8_t color = WHITE)
 	{
 		for(uint8_t yy = y; yy < (y + height); yy++)
@@ -78,17 +91,18 @@ namespace {
 				OLED::draw_pixel(xx, yy, color);
 			}
 		}
+		updateScreen = true;
 	}
 
 	void draw_pot_value(PotWrapper& potentiometer)
 	{
-
 		constexpr uint8_t y = 22;
 		uint8_t x = box_border_width + (pot_val_width + pot_val_margin) * potentiometer.pot_index;
 
 		constexpr uint8_t height = pot_box_bot_line_y_pos - pot_box_top_line_y_pos - pot_box_line_thickness - 1;
 		draw_horizontal_line(boxes[potentiometer.pot_index].x, y, boxes[potentiometer.pot_index].width, height, BLACK); // resets the pot value box to black
 		OLED::graphics_text(x, y, FONT_BASE::FONT_SEVEN_DOT, std::to_string(potentiometer.command.value()).c_str());
+		updateScreen = true;
 	}
 
 	void draw_cc_codes()
@@ -104,6 +118,7 @@ namespace {
 			OLED::graphics_text(x, y, FONT_BASE::FONT_FIVE_DOT, std::to_string(potmeters[i].command.cc()).c_str());
 		}
 
+		updateScreen = true;
 	}
 
 	void draw_channel()
@@ -113,6 +128,7 @@ namespace {
 
 		draw_horizontal_line(x, 0, 25, 7, BLACK); // resets the channel code text space
 		OLED::graphics_text(x, y, FONT_BASE::FONT_FIVE_DOT, std::to_string(potmeters[0].command.channel() + 1).c_str());
+		updateScreen = true;
 	}
 
 	void init_display()
@@ -161,8 +177,7 @@ namespace {
 
 		draw_cc_codes();
 		draw_channel();
-
-		OLED::update();
+		updateScreen = true;
 	}
 
 	template<typename T>
@@ -174,11 +189,8 @@ namespace {
 	int32_t map(int32_t value, int32_t in_min, int32_t in_max, int32_t out_min, int32_t out_max) {
 	  return (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 	}
-}
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-	if (htim == &htim1)
+	void handle_potmeters()
 	{
 		constexpr uint32_t adc_max_offset = 3900;
 		constexpr uint32_t adc_min_offset = 10;
@@ -189,23 +201,23 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 		for (int i = 0; i < pot_count; i++)
 		{
-            uint32_t average = 0;
+			uint32_t average = 0;
 
-            for (int j = 0; j < measurements_per_pot_count; j++)
-            {
-            	average += adcValues[i+(j*pot_count)];
-            }
+			for (int j = 0; j < measurements_per_pot_count; j++)
+			{
+				average += adcValues[i+(j*pot_count)];
+			}
 
-            average /= measurements_per_pot_count;
+			average /= measurements_per_pot_count;
 
-            if (average > adc_max_offset)
-            {
-            	average = adc_max_offset;
-            }
-            else if (average < adc_min_offset)
-            {
-            	average = adc_min_offset;
-            }
+			if (average > adc_max_offset)
+			{
+				average = adc_max_offset;
+			}
+			else if (average < adc_min_offset)
+			{
+				average = adc_min_offset;
+			}
 
 			uint8_t cc_value = map(average, adc_min_offset, adc_max_offset, midi_cc_min, midi_cc_max);
 			if (cc_value != potmeters[i].command.value())
@@ -214,7 +226,67 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 				potmeters[i].changed = true;
 			}
 		}
+	}
 
+	void update_encoder(uint8_t value)
+	{
+		if (value == old_encoder_value)
+		{
+			return;
+		}
+
+		// TODO: when the encoder button is pressed, change from CC to channel mode (and vice versa)
+		// cc mode:      ARR 23, 24, 25 (check manually)
+		// channel mode: ARR 14, 15, 16 (check manually)
+
+		if (encoder_mode == EncoderMode::CC)
+		{
+			for (int i = 0; i < pot_count; i++)
+			{
+				uint8_t cc = value * pot_count + i;
+				if (cc > 127)
+				{
+					cc = 127;
+				}
+
+				potmeters[i].command.cc(cc);
+			}
+
+			draw_cc_codes();
+		}
+		else if (encoder_mode == EncoderMode::Channel)
+		{
+			for(uint8_t i = 0; i < pot_count; i++)
+			{
+				potmeters[i].command.channel(value);
+			}
+
+			draw_channel();
+		}
+	}
+}
+
+
+void EncoderButtonPressed()
+{
+	if(encoder_mode == EncoderMode::CC)
+	{
+		encoder_mode = EncoderMode::Channel;
+		htim2.Instance->ARR = 126;
+	}
+	else
+	{
+		encoder_mode = EncoderMode::CC;
+		htim2.Instance->ARR = 14;
+	}
+}
+
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+	if (htim == &htim1)
+	{
+		handle_potmeters();
 	}
 }
 
@@ -226,13 +298,14 @@ void cpp_main()
 	{
 		potmeters[i].command.channel(0);
 		potmeters[i].command.cc(i);
-
 	}
 
 	HAL_ADC_Start_DMA(&hadc1, adcValues, measurements_count); // do n conversions each. calc averages in the timer callback
 	HAL_TIM_Base_Start_IT(&htim1);
-	// TODO: implement encoder
-	//HAL_TIM_Encoder_Start_IT(&, Channel)
+
+	// init encoder button states
+	EncoderButtonPressed();
+	HAL_TIM_Encoder_Start_IT(&htim2, TIM_CHANNEL_ALL);
 
 	// sending notes demo. uncomment this loop for the other demo
 	//MIDI::Note note;
@@ -262,14 +335,13 @@ void cpp_main()
 	// CC demo, connect a potentiometer to PORTA0
 	while (true)
 	{
-		bool updateScreen = false;
+		update_encoder(htim2.Instance->CNT);
 
 		for (auto& potmeter : potmeters)
 		{
 			if (potmeter.changed)
 			{
 				potmeter.changed = false;
-				updateScreen = true;
 				MIDI_SendPacket(potmeter.command);
 				draw_pot_value(potmeter);
 			}
