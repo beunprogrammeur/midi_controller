@@ -32,7 +32,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
- 
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -52,7 +52,16 @@
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-__weak void EncoderButtonPressed()
+static const uint16_t debounce_time = 300; // ms
+static uint32_t old_times[] = { 0, 0, 0, 0 };
+
+
+__weak void ccButtonPressed(int8_t delta)
+{
+
+}
+
+__weak void channelButtonPressed(int8_t delta)
 {
 
 }
@@ -65,7 +74,6 @@ extern ADC_HandleTypeDef hadc1;
 extern DMA_HandleTypeDef hdma_i2c1_tx;
 extern I2C_HandleTypeDef hi2c1;
 extern TIM_HandleTypeDef htim1;
-extern TIM_HandleTypeDef htim2;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -277,20 +285,6 @@ void TIM1_UP_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles TIM2 global interrupt.
-  */
-void TIM2_IRQHandler(void)
-{
-  /* USER CODE BEGIN TIM2_IRQn 0 */
-
-  /* USER CODE END TIM2_IRQn 0 */
-  HAL_TIM_IRQHandler(&htim2);
-  /* USER CODE BEGIN TIM2_IRQn 1 */
-
-  /* USER CODE END TIM2_IRQn 1 */
-}
-
-/**
   * @brief This function handles I2C1 event interrupt.
   */
 void I2C1_EV_IRQHandler(void)
@@ -310,14 +304,68 @@ void I2C1_EV_IRQHandler(void)
 void EXTI15_10_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
-  if(__HAL_GPIO_EXTI_GET_FLAG(GPIO_PIN_12))
-  {
-	  EncoderButtonPressed();
-  }
-  /* USER CODE END EXTI15_10_IRQn 0 */
-  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_12);
-  /* USER CODE BEGIN EXTI15_10_IRQn 1 */
+	const int8_t   values[] = { 1, -1, 1, -1 };
+	const uint32_t lines[]  = {
+		LL_EXTI_LINE_12,
+		LL_EXTI_LINE_13,
+		LL_EXTI_LINE_14,
+		LL_EXTI_LINE_15,
+	};
 
+	uint32_t time = HAL_GetTick();
+	for(int i = 0; i < 4; i++)
+	{
+		if(LL_EXTI_IsActiveFlag_0_31(lines[i]))
+		{
+			LL_EXTI_ClearFlag_0_31(lines[i]);
+			if(time < old_times[i] || time - old_times[i] > debounce_time)
+			{
+				old_times[i] = time;
+
+				if(i < 2)
+				{
+					ccButtonPressed(values[i]);
+				}
+				else
+				{
+					channelButtonPressed(values[i]);
+				}
+			}
+		}
+	}
+#if 0
+
+  /* USER CODE END EXTI15_10_IRQn 0 */
+  if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_12) != RESET)
+  {
+    LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_12);
+    /* USER CODE BEGIN LL_EXTI_LINE_12 */
+
+    /* USER CODE END LL_EXTI_LINE_12 */
+  }
+  if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_13) != RESET)
+  {
+    LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_13);
+    /* USER CODE BEGIN LL_EXTI_LINE_13 */
+
+    /* USER CODE END LL_EXTI_LINE_13 */
+  }
+  if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_14) != RESET)
+  {
+    LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_14);
+    /* USER CODE BEGIN LL_EXTI_LINE_14 */
+
+    /* USER CODE END LL_EXTI_LINE_14 */
+  }
+  if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_15) != RESET)
+  {
+    LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_15);
+    /* USER CODE BEGIN LL_EXTI_LINE_15 */
+
+    /* USER CODE END LL_EXTI_LINE_15 */
+  }
+  /* USER CODE BEGIN EXTI15_10_IRQn 1 */
+#endif
   /* USER CODE END EXTI15_10_IRQn 1 */
 }
 

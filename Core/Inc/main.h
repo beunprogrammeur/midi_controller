@@ -37,6 +37,7 @@ extern "C" {
 #include "stm32f1xx_ll_cortex.h"
 #include "stm32f1xx_ll_utils.h"
 #include "stm32f1xx_ll_pwr.h"
+#include "stm32f1xx.h"
 #include "stm32f1xx_ll_gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -67,11 +68,20 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define LED_Pin GPIO_PIN_13
+#define LED_Pin LL_GPIO_PIN_13
 #define LED_GPIO_Port GPIOC
-#define ENCODER_BUTTON_Pin GPIO_PIN_12
-#define ENCODER_BUTTON_GPIO_Port GPIOB
-#define ENCODER_BUTTON_EXTI_IRQn EXTI15_10_IRQn
+#define BUT_CC_UP_Pin LL_GPIO_PIN_12
+#define BUT_CC_UP_GPIO_Port GPIOB
+#define BUT_CC_UP_EXTI_IRQn EXTI15_10_IRQn
+#define BUT_CC_DOWN_Pin LL_GPIO_PIN_13
+#define BUT_CC_DOWN_GPIO_Port GPIOB
+#define BUT_CC_DOWN_EXTI_IRQn EXTI15_10_IRQn
+#define BUT_CH_UP_Pin LL_GPIO_PIN_14
+#define BUT_CH_UP_GPIO_Port GPIOB
+#define BUT_CH_UP_EXTI_IRQn EXTI15_10_IRQn
+#define BUT_CH_DOWN_Pin LL_GPIO_PIN_15
+#define BUT_CH_DOWN_GPIO_Port GPIOB
+#define BUT_CH_DOWN_EXTI_IRQn EXTI15_10_IRQn
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

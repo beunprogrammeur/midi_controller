@@ -61,11 +61,11 @@ void DMA1_Channel6_IRQHandler(void);
 void ADC1_2_IRQHandler(void);
 void USB_LP_CAN1_RX0_IRQHandler(void);
 void TIM1_UP_IRQHandler(void);
-void TIM2_IRQHandler(void);
 void I2C1_EV_IRQHandler(void);
 void EXTI15_10_IRQHandler(void);
 /* USER CODE BEGIN EFP */
-void EncoderButtonPressed();
+void ccButtonPressed(int8_t delta);
+void channelButtonPressed(int8_t delta);
 /* USER CODE END EFP */
 
 #ifdef __cplusplus

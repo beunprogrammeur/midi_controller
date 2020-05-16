@@ -1,0 +1,180 @@
+EESchema Schematic File Version 4
+EELAYER 30 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L Device:R_POT RV?
+U 1 1 5EB68074
+P 5250 1200
+F 0 "RV?" H 5150 1450 50  0000 R CNN
+F 1 "R_POT" H 5150 950 50  0000 R CNN
+F 2 "" H 5250 1200 50  0001 C CNN
+F 3 "~" H 5250 1200 50  0001 C CNN
+	1    5250 1200
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_POT RV?
+U 1 1 5EB691D3
+P 4750 1200
+F 0 "RV?" H 4650 1450 50  0000 R CNN
+F 1 "R_POT" H 4650 950 50  0000 R CNN
+F 2 "" H 4750 1200 50  0001 C CNN
+F 3 "~" H 4750 1200 50  0001 C CNN
+	1    4750 1200
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_POT RV?
+U 1 1 5EB6932C
+P 4250 1200
+F 0 "RV?" H 4150 1450 50  0000 R CNN
+F 1 "R_POT" H 4150 950 50  0000 R CNN
+F 2 "" H 4250 1200 50  0001 C CNN
+F 3 "~" H 4250 1200 50  0001 C CNN
+	1    4250 1200
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_POT RV?
+U 1 1 5EB69488
+P 5750 1200
+F 0 "RV?" H 5650 1450 50  0000 R CNN
+F 1 "R_POT" H 5650 950 50  0000 R CNN
+F 2 "" H 5750 1200 50  0001 C CNN
+F 3 "~" H 5750 1200 50  0001 C CNN
+	1    5750 1200
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_POT RV?
+U 1 1 5EB69670
+P 6250 1200
+F 0 "RV?" H 6150 1450 50  0000 R CNN
+F 1 "R_POT" H 6200 950 50  0000 R CNN
+F 2 "" H 6250 1200 50  0001 C CNN
+F 3 "~" H 6250 1200 50  0001 C CNN
+	1    6250 1200
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector:Conn_01x04_Male J?
+U 1 1 5EB6AE39
+P 2150 1850
+F 0 "J?" H 2258 2131 50  0000 C CNN
+F 1 "OLED_CONN" H 2258 2040 50  0000 C CNN
+F 2 "" H 2150 1850 50  0001 C CNN
+F 3 "~" H 2150 1850 50  0001 C CNN
+	1    2150 1850
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector_Generic:Conn_01x20 J?
+U 1 1 5EB6F7D6
+P 4400 3250
+F 0 "J?" H 4480 3242 50  0000 L CNN
+F 1 "stm32_header_L" H 4150 2100 50  0000 L CNN
+F 2 "" H 4400 3250 50  0001 C CNN
+F 3 "~" H 4400 3250 50  0001 C CNN
+	1    4400 3250
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector_Generic:Conn_01x20 J?
+U 1 1 5EB73A0C
+P 5500 3250
+F 0 "J?" H 5580 3242 50  0000 L CNN
+F 1 "stm32_header_R" H 5250 2100 50  0000 L CNN
+F 2 "" H 5500 3250 50  0001 C CNN
+F 3 "~" H 5500 3250 50  0001 C CNN
+	1    5500 3250
+	1    0    0    -1  
+$EndComp
+Wire Notes Line
+	6000 1900 6000 4800
+Wire Notes Line
+	6350 4550 3350 4550
+Wire Notes Line
+	3650 4800 3650 1900
+Wire Notes Line
+	3350 2100 6350 2100
+Text GLabel 5300 2350 0    50   Input ~ 0
+GND
+Text GLabel 5300 2550 0    50   Input ~ 0
+3V3
+Text GLabel 5300 2450 0    50   Input ~ 0
+GND
+Text GLabel 5300 3850 0    50   Input ~ 0
+POT1
+Text GLabel 5300 3750 0    50   Input ~ 0
+POT2
+Text GLabel 5300 3650 0    50   Input ~ 0
+POT3
+Text GLabel 5300 3550 0    50   Input ~ 0
+POT4
+Text GLabel 5300 3450 0    50   Input ~ 0
+POT5
+Text GLabel 4400 1200 2    50   Input ~ 0
+POT1
+Text GLabel 4900 1200 2    50   Input ~ 0
+POT2
+Text GLabel 5400 1200 2    50   Input ~ 0
+POT3
+Text GLabel 5900 1200 2    50   Input ~ 0
+POT4
+Text GLabel 6400 1200 2    50   Input ~ 0
+POT5
+Wire Wire Line
+	6250 1050 5750 1050
+Wire Wire Line
+	5250 1050 5750 1050
+Connection ~ 5750 1050
+Wire Wire Line
+	5250 1050 4750 1050
+Connection ~ 5250 1050
+Wire Wire Line
+	4250 1050 4750 1050
+Connection ~ 4750 1050
+Wire Wire Line
+	4250 1350 4750 1350
+Wire Wire Line
+	4750 1350 5250 1350
+Connection ~ 4750 1350
+Wire Wire Line
+	5250 1350 5750 1350
+Connection ~ 5250 1350
+Wire Wire Line
+	5750 1350 6250 1350
+Connection ~ 5750 1350
+Text GLabel 5250 900  1    50   Input ~ 0
+3V3
+Text GLabel 5250 1500 3    50   Input ~ 0
+GND
+Wire Wire Line
+	5250 900  5250 1050
+Wire Wire Line
+	5250 1350 5250 1500
+Text GLabel 2350 1950 2    50   Input ~ 0
+3V3
+Text GLabel 2350 2050 2    50   Input ~ 0
+GND
+Text GLabel 2350 1750 2    50   Input ~ 0
+OLED_SDA
+Text GLabel 2350 1850 2    50   Input ~ 0
+OLED_SCK
+Text GLabel 4200 3750 0    50   Input ~ 0
+OLED_SDA
+Text GLabel 4200 3650 0    50   Input ~ 0
+OLED_SCK
+$EndSCHEMATC

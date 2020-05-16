@@ -30,16 +30,12 @@
 #include "stm32f1xx_it.h"
 
 
+
 namespace {
 	struct PotWrapper {
 		MIDI::ControlChange command;
 		bool changed;
 		uint8_t pot_index; // order from left to right, which potentiometer is this?
-	};
-
-	enum class EncoderMode {
-		CC,
-		Channel
 	};
 
 	constexpr uint8_t pot_count = 5;
@@ -78,8 +74,9 @@ namespace {
 		{104, 21},
 	};
 
-	uint8_t old_encoder_value = 0;
-	EncoderMode encoder_mode = EncoderMode::Channel;
+	// used to store the buttons previous values
+	int8_t cc_value;
+
 	bool updateScreen = false;
 
 	void draw_horizontal_line(uint8_t x, uint8_t y, uint8_t width, uint8_t height, uint8_t color = WHITE)
@@ -228,59 +225,71 @@ namespace {
 		}
 	}
 
-	void update_encoder(uint8_t value)
+	void update_cc(uint8_t ccValue)
 	{
-		if (value == old_encoder_value)
+		for (int i = 0; i < pot_count; i++)
 		{
-			return;
-		}
-
-		// TODO: when the encoder button is pressed, change from CC to channel mode (and vice versa)
-		// cc mode:      ARR 23, 24, 25 (check manually)
-		// channel mode: ARR 14, 15, 16 (check manually)
-
-		if (encoder_mode == EncoderMode::CC)
-		{
-			for (int i = 0; i < pot_count; i++)
+			uint8_t cc = ccValue * pot_count + i;
+			if (cc > 127)
 			{
-				uint8_t cc = value * pot_count + i;
-				if (cc > 127)
-				{
-					cc = 127;
-				}
-
-				potmeters[i].command.cc(cc);
+				cc = 127;
 			}
 
-			draw_cc_codes();
+			potmeters[i].command.cc(cc);
 		}
-		else if (encoder_mode == EncoderMode::Channel)
-		{
-			for(uint8_t i = 0; i < pot_count; i++)
-			{
-				potmeters[i].command.channel(value);
-			}
 
-			draw_channel();
+		draw_cc_codes();
+	}
+
+	void update_channel(uint8_t channel)
+	{
+		for(uint8_t i = 0; i < pot_count; i++)
+		{
+			potmeters[i].command.channel(channel);
 		}
+
+		draw_channel();
 	}
 }
 
-
-void EncoderButtonPressed()
+/* EXTI 12, see stm32f1xx_it.c/h */
+void ccButtonPressed(int8_t delta)
 {
-	if(encoder_mode == EncoderMode::CC)
+	constexpr uint8_t cc_min = 0;
+	constexpr uint8_t cc_max = 25;
+
+	cc_value += delta;
+
+	if(cc_value > cc_max)
 	{
-		encoder_mode = EncoderMode::Channel;
-		htim2.Instance->ARR = 126;
+		cc_value = cc_max;
 	}
-	else
+	else if(cc_value < cc_min)
 	{
-		encoder_mode = EncoderMode::CC;
-		htim2.Instance->ARR = 14;
+		cc_value = cc_min;
 	}
+
+	update_cc(cc_value);
 }
 
+void channelButtonPressed(int8_t delta)
+{
+	constexpr uint8_t ch_min = 0;
+	constexpr uint8_t ch_max = 15;
+
+	int16_t value = potmeters[0].command.channel() + delta;
+
+	if(value > ch_max)
+	{
+		value = ch_max;
+	}
+	else if(value < ch_min)
+	{
+		value = ch_min;
+	}
+
+	update_channel(value);
+}
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
@@ -300,43 +309,22 @@ void cpp_main()
 		potmeters[i].command.cc(i);
 	}
 
-	HAL_ADC_Start_DMA(&hadc1, adcValues, measurements_count); // do n conversions each. calc averages in the timer callback
+	// do n conversions each. calc averages in the timer callback
+	HAL_ADC_Start_DMA(&hadc1, adcValues, measurements_count);
 	HAL_TIM_Base_Start_IT(&htim1);
 
 	// init encoder button states
-	EncoderButtonPressed();
-	HAL_TIM_Encoder_Start_IT(&htim2, TIM_CHANNEL_ALL);
+	ccButtonPressed(0);
+	channelButtonPressed(0);
 
-	// sending notes demo. uncomment this loop for the other demo
-	//MIDI::Note note;
-	//note.channel(0);
-	//note.pitch(40);
-	//note.velocity(127);
-	//note.press();
-	//while(true)
-	//{
-	//	for(int i = 40; i < 52; i++)
-	//	{
-	//		note.pitch(i);
-	//		HAL_Delay(500);
-	//		MIDI_SendPacket(note);
-	//		note.press();
-	//		HAL_Delay(500);
-	//		MIDI_SendPacket(note);
-	//		note.release();
-	//	}
-	//}
-
-	HAL_Delay(10); // wait for the timer to be fired at least once
-
+	// wait for the timer to be fired at least once
+	HAL_Delay(10);
 	init_display();
 
 
 	// CC demo, connect a potentiometer to PORTA0
 	while (true)
 	{
-		update_encoder(htim2.Instance->CNT);
-
 		for (auto& potmeter : potmeters)
 		{
 			if (potmeter.changed)
