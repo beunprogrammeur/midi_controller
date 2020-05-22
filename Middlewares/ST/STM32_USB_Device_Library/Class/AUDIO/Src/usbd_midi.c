@@ -44,59 +44,85 @@ USBD_HandleTypeDef* _handle = NULL;
 
 __ALIGN_BEGIN uint8_t USBD_MIDI_CfgFSDesc[] __ALIGN_END =
 {
+
 //  /*Configuration Descriptor*/
-//  0x09,   /* bLength: Configuration Descriptor size */
-//  0x02,   /* bDescriptorType: Configuration */
-//  LOBYTE(0x0053),   /* wTotalLength: 2nd byte */
-//  HIBYTE(0x0053),   /* wTotalLength: add total array size here (and on the 2nd byte if needed) */
-//  0x02,   /* bNumInterfaces: 2 interface */
-//  0x01,   /* bConfigurationValue: Configuration value */
-//  0x00,   /* iConfiguration: Index of string descriptor describing the configuration */ /* unused */
-//  0x80,   /* bmAttributes: self powered */
-//  0x32,   /* MaxPower 0 mA */
-//
+  0x09,   /* bLength: Configuration Descriptor size */
+  0x02,   /* bDescriptorType: Configuration */
+  LOBYTE(0x0056),   /* wTotalLength: 2nd byte */
+  HIBYTE(0x0056),   /* wTotalLength: add total array size here (and on the 2nd byte if needed) */
+  0x02,   /* bNumInterfaces: 2 interfaces */
+  0x01,   /* bConfigurationValue: Configuration value */
+  0x00,   /* iConfiguration: Index of string descriptor describing the configuration */ /* unused */
+  0x80,   /* bmAttributes: self powered */ // TODO:We want this set to bus powered in the future
+  0x32,   /* MaxPower 0 mA */
+
+
+
+	  /* Interface Descriptor ((Audio Control) */
+	  0x09,   /* bLength: length of this descriptor*/
+	  0x04,   /* bDescriptorType: INTERFACE */
+	  0x00,   /* bInterfaceNumber: */
+	  0x00,   /* bAlternateSetting: (none) */
+	  0x00,   /* bNumEndpoints: (no endpoints) */
+	  0x01,   /* bInterfaceClass: AUDIO */
+	  0x01,   /* bInterfaceSubClass: AUDIO_CONTROL */
+	  0x00,   /* bInterfaceProtocol: (none) */
+	  0x00,   /* iInterface: none */
+
+
+	  // Class-specific AC Interface Descriptor
+	  0x09,   /* bLength: length of this descriptor*/
+	  0x24,   /* bDescriptorType: CS_INTERFACE */
+	  0x01,   /* bDescriptorSubtype: HEADER */
+	  0x00,   /* bcdADC*/
+	  0x01,   /* bcdADC*/
+	  0x09,   /* wTotalLength: */
+	  0x00,   /* wTotalLength: */
+	  0x01,   /* bInCollection: (1 streaming interface) */
+	  0x01,   /* baInterfaceNr: (interface 1 is stream) */
+
 //	  /*Interface Descriptor */
-//	  0x09,   /* bLength: Interface Descriptor size */
-//	  0x04,  /* bDescriptorType: INTERFACE */
-//	  0x00,   /* bInterfaceNumber: Number of Interface */
-//	  0x00,   /* bAlternateSetting: Alternate setting */
-//	  0x02,   /* bNumEndpoints: MIDI in AND out */
-//	  0x01,   /* bInterfaceClass: AUDIO */
-//	  0x03,   /* bInterfaceSubClass: MIDI Streaming */
-//	  0x00,   /* bInterfaceProtocol: not used*/
-//	  0x00,   /* iInterface: not used*/
+	  0x09,   /* bLength: Interface Descriptor size */
+	  0x04,   /* bDescriptorType: INTERFACE */
+	  0x01,   /* bInterfaceNumber: Number of Interface */
+	  0x00,   /* bAlternateSetting: Alternate setting */
+	  0x02,   /* bNumEndpoints: MIDI in AND out */
+	  0x01,   /* bInterfaceClass: AUDIO */
+	  0x03,   /* bInterfaceSubClass: MIDI Streaming */
+	  0x00,   /* bInterfaceProtocol: not used*/
+	  0x00,   /* iInterface: not used*/
 //
 //		  /* MIDIStreaming Interface Descriptor */
-//		  0x07,   /* bLength: Interface Descriptor size */
-//		  0x24,   /* bDescriptorType: CS_INTERFACE */
-//		  0x01,   /* bDescriptorSubtype: MS_HEADER */
-//		  LOBYTE(0x0100),   /* bcdADC: Revision of this class specification */
-//		  HIBYTE(0x0100),   /* cdADC: 2nd byte */
-//		  LOBYTE(0x0041),   /* wTotalLength: count size of all sub descriptors*/
-//		  HIBYTE(0x0041),   /* wTotalLength: count size of all sub descriptors*/
+		  0x07,   /* bLength: Interface Descriptor size */
+		  0x24,   /* bDescriptorType: CS_INTERFACE */
+		  0x01,   /* bDescriptorSubtype: MS_HEADER */
+		  LOBYTE(0x0100),   /* bcdADC: Revision of this class specification */
+		  HIBYTE(0x0100),   /* cdADC: 2nd byte */
+		  LOBYTE(0x0016),   /* wTotalLength: count size of all sub descriptors*/
+		  HIBYTE(0x0016),   /* wTotalLength: count size of all sub descriptors*/
 //
 //		  	  /*
 //		  	   * INTERNAL
 //		       */
 //
-//		  	  /* MIDIStreaming Interface Descriptor */
-//		  	  0x06, /* bLength: Interface Descriptor size */
-//			  0x24, /* bDescriptorType: CS_INTERFACE */
-//			  0x02, /* bDescriptorSubType: MIDI_IN_JACK */
-//			  0x01, /* bJackType: embedded */
-//			  0x01, /* bJackId: first jack (of 4) */
-//			  0x00, /* iJack: unused*/
+//		  	  /* MIDIStreaming Interface Descriptor (JACK IN) */
+		  	  0x06, /* bLength: Interface Descriptor size */
+			  0x24, /* bDescriptorType: CS_INTERFACE */
+			  0x02, /* bDescriptorSubType: MIDI_IN_JACK */
+			  0x01, /* bJackType: embedded */
+			  0x01, /* bJackId: first jack (of 2) */
+			  0x00, /* iJack: unused*/
 //
 //			  /* MIDIStreaming Interface Descriptor*/
-//			  0x09, /* bLength: Interface Descriptor size */
-//			  0x24, /* bDescriptorType: CS_INTERFACE */
-//			  0x03, /* bDescriptorSubType: MIDI_OUT_JACK */
-//			  0x01, /* bJackType: Embedded */
-//			  0x02, /* bJackId: second jack (of 4) */
-//			  0x01, /* bNrInputPins: Number of Input Pins of this Jack */
-//			  0x02, /* BaSourceID(1): ID of the Entity to which this Pin is connected */
-//			  0x01, /* BaSourcePin(1): Output Pin number of the Entity to which this Input Pin is connected */
-//			  0x00, /* iJack: unused */
+			  0x09, /* bLength: Interface Descriptor size */
+			  0x24, /* bDescriptorType: CS_INTERFACE */
+			  0x03, /* bDescriptorSubType: MIDI_OUT_JACK */
+			  0x01, /* bJackType: Embedded */
+			  0x02, /* bJackId: second jack (of 4) */
+			  0x01, /* bNrInputPins: Number of Input Pins of this Jack */
+			  0x02, /* BaSourceID(1): ID of the Entity to which this Pin is connected */
+			  0x01, /* BaSourcePin(1): Output Pin number of the Entity to which this Input Pin is connected */
+			  0x00, /* iJack: unused */
 //
 //		  	  /*
 //		  	   * EXTERNAL
@@ -126,69 +152,39 @@ __ALIGN_BEGIN uint8_t USBD_MIDI_CfgFSDesc[] __ALIGN_END =
 //			   */
 //
 //			  /* Endpoint Descriptor */
-//			  0x09, /* bLength: Endpoint Descriptor size */
-//			  0x05, /* bDescriptorType: ENDPOINT */
-//			  MIDI_OUT_EP, /* bEndpointAddress: OUT endpoint 1 */
-//			  0x02, /* bmAttributes: BULK, not shared */
-//			  LOBYTE(MIDI_DATA_FS_MAX_PACKET_SIZE), /* wMaxPacketSize: 64 bytes per packet */
-//			  HIBYTE(MIDI_DATA_FS_MAX_PACKET_SIZE), /* wMaxPacketSize: */
-//			  0x00, /* bInterval: ignored for BULK */
-//			  0x00, /* bRefresh: unused */
-//			  0x00, /* bSynchAddress: unused */
+			  0x09, /* bLength: Endpoint Descriptor size */
+			  0x05, /* bDescriptorType: ENDPOINT */
+			  MIDI_OUT_EP, /* bEndpointAddress: OUT endpoint 1 */
+			  0x02, /* bmAttributes: BULK, not shared */
+			  LOBYTE(MIDI_DATA_FS_MAX_PACKET_SIZE), /* wMaxPacketSize: 64 bytes per packet */
+			  HIBYTE(MIDI_DATA_FS_MAX_PACKET_SIZE), /* wMaxPacketSize: */
+			  0x00, /* bInterval: ignored for BULK */
+			  0x00, /* bRefresh: unused */
+			  0x00, /* bSynchAddress: unused */
 //
 //			  	  /* MIDIStreaming Endpoint Descriptor */
-//			  	  0x05, /* bLength: MIDIStreaming Endpoint Descriptor size */
-//				  0x25, /* bDescriptorType: CS_ENDPOINT */
-//				  0x01, /* bDescriptorSubType: MS_GENERAL */
-//				  0x01, /* bNumEmbMIDIJack: number of embedded MIDI-IN jacks */
-//				  0x01, /* baAssocJackID(1): ID of the Embedded MIDI-IN jack */
+			  	  0x05, /* bLength: MIDIStreaming Endpoint Descriptor size */
+				  0x25, /* bDescriptorType: CS_ENDPOINT */
+				  0x01, /* bDescriptorSubType: MS_GENERAL */
+				  0x01, /* bNumEmbMIDIJack: number of embedded MIDI-IN jacks */
+				  0x01, /* baAssocJackID(1): ID of the Embedded MIDI-IN jack */
 //
 //			  /* Endpoint Descriptor */
-//			  0x09, /* bLength: Endpoint Descriptor size */
-//			  0x05, /* bDescriptorType: ENDPOINT */
-//			  MIDI_IN_EP, /* bEndpointAddress: IN endpoint 1 */
-//			  0x02, /* bmAttributes: BULK, not shared */
-//			  LOBYTE(MIDI_DATA_FS_MAX_PACKET_SIZE), /* wMaxPacketSize: 64 bytes */
-//			  HIBYTE(MIDI_DATA_FS_MAX_PACKET_SIZE), /* wMaxPacketSize: 64 bytes */
-//			  0x00, /* bInterval: unused */
-//			  0x00, /* bRefresh: unused */
-//			  0x00, /* bSynchAddress: unused */
+			  0x09, /* bLength: Endpoint Descriptor size */
+			  0x05, /* bDescriptorType: ENDPOINT */
+			  MIDI_IN_EP, /* bEndpointAddress: IN endpoint 1 */
+			  0x02, /* bmAttributes: BULK, not shared */
+			  LOBYTE(MIDI_DATA_FS_MAX_PACKET_SIZE), /* wMaxPacketSize: 64 bytes */
+			  HIBYTE(MIDI_DATA_FS_MAX_PACKET_SIZE), /* wMaxPacketSize: 64 bytes */
+			  0x00, /* bInterval: unused */
+			  0x00, /* bRefresh: unused */
+			  0x00, /* bSynchAddress: unused */
 //			  	  /* MIDIStreaming Endpoint Descriptor */
-//			  	  0x05, /* bLength: MIDIStreaming Endpoint Descriptor size */
-//				  0x25, /* bDescriptorType: CS_ENDPOINT */
-//				  0x01, /* bDescriptorSubType: MS_GENERAL */
-//				  0x01, /* bNumEmbMIDIJack: number of embedded MIDI-OUT jacks */
-//				  0x02, /* BaAssocJackID(1): ID of the embedded MIDI-OUT jack */
-
-		/*
-		 * borrowed from:  https://github.com/spectran/stm32f103-usb-midi
-		 * TODO: check what makes the difference (I was missing the standard AC interface descriptor.. but this one is way different from the example)
-		 * */
-
-		  // configuration descriptor
-		  0x09, 0x02, 0x65, 0x00, 0x02, 0x01, 0x00, 0x80, 0x31,
-
-		  // The Audio Interface Collection
-		  0x09, 0x04, 0x00, 0x00, 0x00, 0x01, 0x01, 0x00, 0x00, // Standard AC Interface Descriptor
-		  0x09, 0x24, 0x01, 0x00, 0x01, 0x09, 0x00, 0x01, 0x01, // Class-specific AC Interface Descriptor
-		  0x09, 0x04, 0x01, 0x00, 0x02, 0x01, 0x03, 0x00, 0x00, // MIDIStreaming Interface Descriptors
-		  0x07, 0x24, 0x01, 0x00, 0x01, 0x41, 0x00,             // Class-Specific MS Interface Header Descriptor
-
-		  // MIDI IN JACKS
-		  0x06, 0x24, 0x02, 0x01, 0x01, 0x00,
-		  0x06, 0x24, 0x02, 0x02, 0x02, 0x00,
-
-		  // MIDI OUT JACKS
-		  0x09, 0x24, 0x03, 0x01, 0x03, 0x01, 0x02, 0x01, 0x00,
-		  0x09, 0x24, 0x03, 0x02, 0x06, 0x01, 0x01, 0x01, 0x00,
-
-		  // OUT endpoint descriptor
-		  0x09, 0x05, MIDI_OUT_EP, 0x02, 0x40, 0x00, 0x00, 0x00, 0x00,
-		  0x05, 0x25, 0x01, 0x01, 0x01,
-
-		  // IN endpoint descriptor
-		  0x09, 0x05, MIDI_IN_EP, 0x02, 0x40, 0x00, 0x00, 0x00, 0x00,
-		  0x05, 0x25, 0x01, 0x01, 0x03,
+			  	  0x05, /* bLength: MIDIStreaming Endpoint Descriptor size */
+				  0x25, /* bDescriptorType: CS_ENDPOINT */
+				  0x01, /* bDescriptorSubType: MS_GENERAL */
+				  0x01, /* bNumEmbMIDIJack: number of embedded MIDI-OUT jacks */
+				  0x02, /* BaAssocJackID(1): ID of the embedded MIDI-OUT jack */
 };
 
 uint8_t USBD_MIDI_RegisterInterface(USBD_HandleTypeDef *pdev, USBD_MIDI_ItfTypeDef *fops)
