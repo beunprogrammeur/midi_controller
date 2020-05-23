@@ -25,4 +25,15 @@ void cpp_main()
   MIDI_SendPacket(command);
 }
 
+void cpp_main()
+{
+  MIDI::Note note;
+  note.channel(0);
+  note.velocity(127);
+  note.pitch(44);
+  note.press(); // or call release
+
+  MIDI_SendPacket(note);
+}
+
 ```
